@@ -1,4 +1,4 @@
-package unclutter.asksven.com.unclutter;
+package com.asksven.unclutter;
 
 import org.junit.Test;
 

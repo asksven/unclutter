@@ -1,4 +1,4 @@
-package unclutter.asksven.com.unclutter;
+package com.asksven.unclutter;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
