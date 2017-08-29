@@ -34,6 +34,7 @@ dependencies:
         - "/usr/local/android-sdk-linux/platforms/android-22"
         - "~/repoName/.gradle"
     override:
+        - chmod +x gradlew
         - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
 
 test:
