@@ -56,5 +56,5 @@ function uploadToHockeyApp {
        --form "teams=${HOCKEYAPP_TEAM_ID}" \
        --form "release_type=2" \
        --header "X-HockeyAppToken: ${HOCKEYAPP_TOKEN}" \
-       "https://upload.hockeyapp.net/api/2/apps/${HOCKEYAPP_APP_IDENTIFIER}/app_versions/upload"
+       "https://upload.hockeyapp.net/api/2/apps/${HOCKEYAPP_APP_ID}/app_versions/upload"
 }
