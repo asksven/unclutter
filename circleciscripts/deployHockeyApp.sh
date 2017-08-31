@@ -42,7 +42,7 @@ function uploadToHockeyApp {
   HOCKEYAPP_NOTES_HEADER_HTML=${HOCKEYAPP_NOTES_HEADER//$'\n'/<br>}
   HOCKEYAPP_NOTES="${HOCKEYAPP_NOTES_HEADER_HTML} ${GIT_PRETTY_COMMIT_LOG}"
 
-  HOCKEYAPP_EXPORT_APK_PATH=`find $HOME/unclutter/app/build/outputs/apk -name unclutter*.apk`
+  HOCKEYAPP_EXPORT_APK_PATH=`find $HOME/unclutter/app/build/outputs/apk -name unclutter_release*.apk`
 
   curl --verbose \
        --fail \
