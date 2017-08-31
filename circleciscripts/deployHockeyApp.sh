@@ -44,7 +44,10 @@ function uploadToHockeyApp {
 
   HOCKEYAPP_EXPORT_APK_PATH=`find $HOME/unclutter/app/build/outputs/apk -name unclutter_release*.apk`
 
+  env | grep "^HOCKEY"
+
   curl --verbose \
+       --trace \
        --fail \
        --form "status=2" \
        --form "notify=1" \
