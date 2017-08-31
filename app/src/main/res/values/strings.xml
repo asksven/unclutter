@@ -90,4 +90,8 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="label_button_no">No</string>
+    <string name="pref_app_analytics_title">Analytics</string>
+    <string name="pref_app_analytics_summary">Help improving app: allow analytics</string>
+
 </resources>
