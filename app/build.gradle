@@ -9,7 +9,9 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        versionNameSuffix = getBuildSuffix()
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testBuildType "debug"
     }
 
     signingConfigs {
@@ -62,3 +64,15 @@ dependencies {
     compile 'com.android.support:design:26.+'
     testCompile 'junit:junit:4.12'
 }
+
+def getBuildSuffix() {
+    def ret = ""
+    def buildNumber = System.getenv("CIRCLE_BUILD_NUM")
+    if (buildNumber != null) {
+        ret = "-" + buildNumber
+    }
+
+    println ">>>>> Build number: \"" + ret + "\"";
+    return ret
+}
+
