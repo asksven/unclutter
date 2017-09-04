@@ -16,6 +16,8 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,6 +32,7 @@ import net.hockeyapp.android.Tracking;
 import net.hockeyapp.android.UpdateManager;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +40,10 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity
 {
     static final String TAG = "MainActivity";
+
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,6 +63,22 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
+
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        // use this setting to
+        // improve performance if you know that changes
+        // in content do not change the layout size
+        // of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(mLayoutManager);
+        List<AppInfo> input = getAppInfo(); //new ArrayList<>();
+//        for (int i = 0; i < 100; i++) {
+//            input.add("Test" + i);
+//        }// define an adapter
+        mAdapter = new AppListAdapter(input);
+        recyclerView.setAdapter(mAdapter);
     }
 
     /* Request updates at startup */
@@ -156,7 +179,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_test)
         {
             final PackageManager pm = getPackageManager();
-            final UsageStatsManager um=(UsageStatsManager)this.getSystemService("usagestats");// Context.USAGE_STATS_SERVICE);
+            final UsageStatsManager um=(UsageStatsManager)this.getSystemService(Context.USAGE_STATS_SERVICE);
 
             //get a list of installed apps.
             List<ApplicationInfo> applications = pm.getInstalledApplications(PackageManager.GET_META_DATA);
@@ -191,4 +214,47 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+    @TargetApi(21)
+    List<AppInfo> getAppInfo()
+    {
+
+        List<AppInfo> apps = new ArrayList<AppInfo>();
+
+        final PackageManager pm = getPackageManager();
+        final UsageStatsManager um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
+
+        //get a list of installed apps.
+        List<ApplicationInfo> applications = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
+        long now = System.currentTimeMillis();
+
+        Map<String, UsageStats> usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
+
+        for (PackageInfo packageInfo : packages)
+        {
+            // Filter out system apps
+            if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+            {
+                ApplicationInfo ai = packageInfo.applicationInfo;
+                String appLabel = "unknown";
+                if (ai != null)
+                {
+                    appLabel = (String) pm.getApplicationLabel(packageInfo.applicationInfo);
+                }
+
+                AppInfo app = new AppInfo(appLabel, packageInfo.packageName, packageInfo.firstInstallTime, packageInfo.lastUpdateTime, -1, -1);
+                UsageStats us = (UsageStats) usageStats.get(packageInfo.packageName);
+                if (us != null)
+                {
+                    app.setLastUsed(us.getLastTimeUsed());
+                    app.setTimeInForeground(us.getTotalTimeInForeground());
+                }
+
+                apps.add(app);
+            }
+
+        }
+
+        return apps;
+    }
 }
