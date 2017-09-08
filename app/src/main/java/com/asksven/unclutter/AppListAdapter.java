@@ -85,7 +85,6 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         holder.txtFooter.setText(app.getPackageName());
         long now = System.currentTimeMillis();
 
-        holder.appAge.setText(DateUtils.formatDurationLong(now - app.getLastUsed()));
         if (app.getLastUsed() < (1000*60*60*24))
         {
             String infinity = DecimalFormatSymbols.getInstance().getInfinity();

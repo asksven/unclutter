@@ -1,9 +1,13 @@
 package com.asksven.unclutter;
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AppOpsManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -11,8 +15,12 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +45,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity
 {
     static final String TAG = "MainActivity";
+    static final int PERMISSION_REQUEST_INTERNET = 100;
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
@@ -53,6 +62,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        checkForPermissions();
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -68,9 +80,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        Picasso.setSingletonInstance(new Picasso.Builder(this)
-                .addRequestHandler(new AppIconRequestHandler(this))
-                .build());
+        Picasso.Builder pb = new Picasso.Builder(this);
+        pb.addRequestHandler(new AppIconRequestHandler(this));
+        Picasso built = pb.build();
+        // Uncomment to test caching: green=from memory, blue=from disk, red=from network
+        // built.setIndicatorsEnabled(true);
+
+        Picasso.setSingletonInstance(built);
 
 
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -89,12 +105,6 @@ public class MainActivity extends AppCompatActivity
         mAdapter = new AppListAdapter(apps);
         recyclerView.setAdapter(mAdapter);
 
-        pm = getPackageManager();
-        long now = System.currentTimeMillis();
-        um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
-        usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
-
-        new AppInfoTask().execute("foo", "bar");
     }
 
     /* Request updates at startup */
@@ -147,8 +157,12 @@ public class MainActivity extends AppCompatActivity
             editor.commit();
         }
 
+        pm = getPackageManager();
+        long now = System.currentTimeMillis();
+        um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
+        usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
 
-
+        new AppInfoTask().execute("foo", "bar");
 
     }
 
@@ -210,8 +224,8 @@ public class MainActivity extends AppCompatActivity
 
             for (PackageInfo packageInfo : packages)
             {
-                // Filter out system apps
-                if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+                // Filter out system apps and apps not installed for the current user
+                if ( ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) && ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) == 0) )
                 {
                     Log.d(TAG, "Installed package :" + packageInfo.packageName);
 //                    Log.d(TAG, "Installed first :" + DateUtils.formatDurationLong(now - packageInfo.firstInstallTime));
@@ -243,8 +257,12 @@ public class MainActivity extends AppCompatActivity
 
             for (PackageInfo packageInfo : packages)
             {
-                // Filter out system apps
-                if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+                // Filter out system apps, apps not installed for current user and test-only apps
+                if ( ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+                        && ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0)
+                        && ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_TEST_ONLY) == 0) )
+                // @todo check out the flag FLAG_IS_DATA_ONLY (it could be an interesting feature to uninstall apps without removing their data)
+                // @todo check out the flag FLAG_ALLOW_BACKUP (could be an interesting feature to offer to automatically uninstall apps having a backup)
                 {
                     ApplicationInfo ai = packageInfo.applicationInfo;
                     String appLabel = "unknown";
@@ -292,5 +310,81 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    ;
+    private void checkForPermissions()
+    {
+        AppOpsManager appOps = (AppOpsManager) this.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow("android:get_usage_stats", android.os.Process.myUid(), this.getPackageName());
+        boolean granted = mode == AppOpsManager.MODE_ALLOWED;
+
+        if (!granted)
+        {
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setCancelable(true);
+            alertBuilder.setTitle(getResources().getText(R.string.usage_stats_permission_title));
+            alertBuilder.setMessage(getResources().getText(R.string.usage_stats_permission_title));
+            alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    startActivity(new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS));                }
+            });
+
+            AlertDialog alert = alertBuilder.create();
+            alert.show();
+
+        }
+        else
+        {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
+            {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+                alertBuilder.setCancelable(true);
+                alertBuilder.setTitle(getResources().getText(R.string.internet_permission_title));
+                alertBuilder.setMessage(getResources().getText(R.string.internet_permission_title));
+                alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.INTERNET},
+                                PERMISSION_REQUEST_INTERNET);
+                    }
+                });
+
+                AlertDialog alert = alertBuilder.create();
+                alert.show();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        switch (requestCode)
+        {
+            case MainActivity.PERMISSION_REQUEST_INTERNET:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else
+                {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
 }
