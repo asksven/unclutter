@@ -1,17 +1,17 @@
 package com.asksven.unclutter;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.text.DecimalFormatSymbols;
+import java.util.List;
 
 public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHolder>
 {
@@ -25,6 +25,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         // each data item is just a string in this case
         public TextView txtHeader;
         public TextView txtFooter;
+        public TextView appAge;
         public ImageView appIcon;
         public View layout;
 
@@ -35,6 +36,8 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
             txtHeader = (TextView) v.findViewById(R.id.firstLine);
             txtFooter = (TextView) v.findViewById(R.id.secondLine);
             appIcon   = (ImageView) v.findViewById(R.id.icon);
+            appAge    = (TextView) v.findViewById(R.id.age);
+
         }
     }
 
@@ -80,27 +83,24 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         final AppInfo app = values.get(position);
         holder.txtHeader.setText(app.getAppName());
         holder.txtFooter.setText(app.getPackageName());
+        long now = System.currentTimeMillis();
 
-        PackageManager pm = holder.appIcon.getContext().getPackageManager();
-        Drawable icon = null;
-        try
+        holder.appAge.setText(DateUtils.formatDurationLong(now - app.getLastUsed()));
+        if (app.getLastUsed() < (1000*60*60*24))
         {
-            icon = pm.getApplicationIcon(app.getPackageName());
+            String infinity = DecimalFormatSymbols.getInstance().getInfinity();
+            holder.appAge.setText(infinity + " days");
         }
-        catch (PackageManager.NameNotFoundException e)
+        else
         {
-            // Error: not found
-        }
-        holder.appIcon.setImageDrawable(icon);
-        holder.txtHeader.setOnClickListener(new OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                remove(position);
-            }
-        });
+            holder.appAge.setText(DateUtils.formatDurationLong(now - app.getLastUsed()));
 
+        }
+
+
+
+        Uri uri = Uri.parse(AppIconRequestHandler.SCHEME_PNAME + ":" + app.getPackageName());
+        Picasso.with(holder.appIcon.getContext()).load(uri).into(holder.appIcon);
     }
 
     // Return the size of your dataset (invoked by the layout manager)

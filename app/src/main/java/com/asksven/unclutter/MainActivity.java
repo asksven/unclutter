@@ -3,14 +3,12 @@ package com.asksven.unclutter;
 import android.annotation.TargetApi;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -20,20 +18,19 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.ProgressBar;
+
+import com.squareup.picasso.Picasso;
 
 import net.hockeyapp.android.CrashManager;
 import net.hockeyapp.android.Tracking;
 import net.hockeyapp.android.UpdateManager;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +39,15 @@ public class MainActivity extends AppCompatActivity
     static final String TAG = "MainActivity";
 
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+
+    private List<AppInfo> apps = new ArrayList<AppInfo>();
+    private List<PackageInfo> packages = null;
+    private PackageManager pm = null;
+    private UsageStatsManager um = null;
+    Map<String, UsageStats> usageStats = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -64,21 +68,33 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        Picasso.setSingletonInstance(new Picasso.Builder(this)
+                .addRequestHandler(new AppIconRequestHandler(this))
+                .build());
+
+
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        // use this setting to
-        // improve performance if you know that changes
-        // in content do not change the layout size
-        // of the RecyclerView
+        recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setHasFixedSize(true);
+        recyclerView.setVisibility(View.INVISIBLE);
+
+        progressBar = (ProgressBar) findViewById(R.id.progress_horizontal);
+        progressBar.setVisibility(View.VISIBLE);
+
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
-        List<AppInfo> input = getAppInfo(); //new ArrayList<>();
-//        for (int i = 0; i < 100; i++) {
-//            input.add("Test" + i);
-//        }// define an adapter
-        mAdapter = new AppListAdapter(input);
+
+        apps.clear();
+        mAdapter = new AppListAdapter(apps);
         recyclerView.setAdapter(mAdapter);
+
+        pm = getPackageManager();
+        long now = System.currentTimeMillis();
+        um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
+        usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
+
+        new AppInfoTask().execute("foo", "bar");
     }
 
     /* Request updates at startup */
@@ -99,8 +115,7 @@ public class MainActivity extends AppCompatActivity
             {
                 UpdateManager.register(this);
             }
-        }
-        catch (Exception e)
+        } catch (Exception e)
         {
         }
 
@@ -114,9 +129,11 @@ public class MainActivity extends AppCompatActivity
             Log.i(TAG, "Application was launched for the first time with analytics");
 
             Snackbar bar = Snackbar.make(findViewById(android.R.id.content), R.string.pref_app_analytics_summary, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.label_button_no, new View.OnClickListener() {
+                    .setAction(R.string.label_button_no, new View.OnClickListener()
+                    {
                         @Override
-                        public void onClick(View v) {
+                        public void onClick(View v)
+                        {
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putBoolean("analytics", false);
                             editor.commit();
@@ -129,6 +146,8 @@ public class MainActivity extends AppCompatActivity
             editor.putBoolean("analytics_opt_out_offered", true);
             editor.commit();
         }
+
+
 
 
     }
@@ -144,7 +163,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroy()
+    {
         super.onDestroy();
 
         // Hockeyapp
@@ -179,14 +199,14 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_test)
         {
             final PackageManager pm = getPackageManager();
-            final UsageStatsManager um=(UsageStatsManager)this.getSystemService(Context.USAGE_STATS_SERVICE);
+            final UsageStatsManager um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
 
             //get a list of installed apps.
             List<ApplicationInfo> applications = pm.getInstalledApplications(PackageManager.GET_META_DATA);
             List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
             long now = System.currentTimeMillis();
 
-            Map<String, UsageStats> usageStats = um.queryAndAggregateUsageStats(now - (365*24*60*60*1000), now);
+            Map<String, UsageStats> usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
 
             for (PackageInfo packageInfo : packages)
             {
@@ -201,8 +221,7 @@ public class MainActivity extends AppCompatActivity
                     {
                         Log.d(TAG, "Last used :" + DateUtils.formatDurationLong(now - us.getLastTimeUsed()));
                         Log.d(TAG, "Time spend in foregroud :" + DateUtils.formatDurationLong(us.getTotalTimeInForeground()));
-                    }
-                    else
+                    } else
                     {
                         Log.d(TAG, "No usage stats found for " + packageInfo.packageName);
                     }
@@ -214,47 +233,64 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @TargetApi(21)
-    List<AppInfo> getAppInfo()
+    private class AppInfoTask extends AsyncTask<String, Void, String>
     {
 
-        List<AppInfo> apps = new ArrayList<AppInfo>();
-
-        final PackageManager pm = getPackageManager();
-        final UsageStatsManager um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
-
-        //get a list of installed apps.
-        List<ApplicationInfo> applications = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
-        long now = System.currentTimeMillis();
-
-        Map<String, UsageStats> usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
-
-        for (PackageInfo packageInfo : packages)
+        @Override
+        protected String doInBackground(String... params)
         {
-            // Filter out system apps
-            if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
+            // perform long running operation operation
+
+            for (PackageInfo packageInfo : packages)
             {
-                ApplicationInfo ai = packageInfo.applicationInfo;
-                String appLabel = "unknown";
-                if (ai != null)
+                // Filter out system apps
+                if ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
                 {
-                    appLabel = (String) pm.getApplicationLabel(packageInfo.applicationInfo);
+                    ApplicationInfo ai = packageInfo.applicationInfo;
+                    String appLabel = "unknown";
+                    if (ai != null)
+                    {
+                        appLabel = (String) pm.getApplicationLabel(packageInfo.applicationInfo);
+                    }
+
+                    AppInfo app = new AppInfo(appLabel, packageInfo.packageName, packageInfo.firstInstallTime, packageInfo.lastUpdateTime, -1, -1);
+                    UsageStats us = (UsageStats) usageStats.get(packageInfo.packageName);
+                    if (us != null)
+                    {
+                        app.setLastUsed(us.getLastTimeUsed());
+                        app.setTimeInForeground(us.getTotalTimeInForeground());
+                    }
+
+                    apps.add(app);
                 }
 
-                AppInfo app = new AppInfo(appLabel, packageInfo.packageName, packageInfo.firstInstallTime, packageInfo.lastUpdateTime, -1, -1);
-                UsageStats us = (UsageStats) usageStats.get(packageInfo.packageName);
-                if (us != null)
-                {
-                    app.setLastUsed(us.getLastTimeUsed());
-                    app.setTimeInForeground(us.getTotalTimeInForeground());
-                }
+                Collections.sort(apps, new LastUsedComparator());
 
-                apps.add(app);
             }
+
+            return "done";
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            recyclerView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setIndeterminate(false);
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+
+            progressBar.setIndeterminate(true);
+            packages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
+            apps.clear();
 
         }
 
-        return apps;
     }
+
+    ;
 }

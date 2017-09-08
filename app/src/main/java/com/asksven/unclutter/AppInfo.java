@@ -4,6 +4,8 @@ package com.asksven.unclutter;
  * Created by sven on 04.09.2017.
  */
 
+import java.util.Comparator;
+
 /**
  * Value holder for app info stuff
  */
@@ -76,3 +78,13 @@ public class AppInfo
         this.timeInForeground = timeInForeground;
     }
 }
+
+class LastUsedComparator implements Comparator<AppInfo>
+{
+    @Override
+    public int compare(AppInfo a, AppInfo b)
+    {
+        return ( b.getLastUsed() < a.getLastUsed() ? -1 : b.getLastUsed() == a.getLastUsed() ? 0 : 1 );
+    }
+}
+

@@ -12,24 +12,20 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" >
 
-        <!-- A RecyclerView with some commonly used attributes -->
+        <ProgressBar
+            android:id="@+id/progress_horizontal"
+            android:indeterminateOnly="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyleHorizontal"/>
 
+        <!-- A RecyclerView with some commonly used attributes -->
         <android.support.v7.widget.RecyclerView
             android:id="@+id/my_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical" />
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="12dp"
-            android:layout_marginRight="12dp"
-            android:elevation="2dp"
-            android:src="@android:drawable/ic_menu_add" />
 
     </RelativeLayout>
 </android.support.v4.widget.NestedScrollView>
