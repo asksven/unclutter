@@ -85,16 +85,7 @@ public class AppIconRequestHandler extends RequestHandler
         final Drawable drawable;
         try
         {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1)
-            {
-                drawable = resources.getDrawableForDensity(iconId, dpi, null);
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
-            {
-                drawable = resources.getDrawableForDensity(iconId, dpi);
-            } else
-            {
-                drawable = resources.getDrawable(iconId);
-            }
+            drawable = resources.getDrawableForDensity(iconId, dpi, null);
         } catch (Resources.NotFoundException e)
         {
             return getFullResDefaultActivityIcon();
@@ -107,33 +98,31 @@ public class AppIconRequestHandler extends RequestHandler
         if (defaultAppIcon == null)
         {
             Drawable drawable;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
-            {
-                drawable = Resources.getSystem().getDrawableForDensity(
-                        android.R.mipmap.sym_def_app_icon, dpi);
-            } else
-            {
-                drawable = Resources.getSystem().getDrawable(
-                        android.R.drawable.sym_def_app_icon);
-            }
+            drawable = Resources.getSystem().getDrawableForDensity(
+                    android.R.mipmap.sym_def_app_icon, dpi);
             defaultAppIcon = drawableToBitmap(drawable);
         }
         return defaultAppIcon;
     }
 
-    public static Bitmap drawableToBitmap (Drawable drawable) {
+    public static Bitmap drawableToBitmap(Drawable drawable)
+    {
         Bitmap bitmap = null;
 
-        if (drawable instanceof BitmapDrawable) {
+        if (drawable instanceof BitmapDrawable)
+        {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
+            if (bitmapDrawable.getBitmap() != null)
+            {
                 return bitmapDrawable.getBitmap();
             }
         }
 
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0)
+        {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
+        } else
+        {
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         }
 

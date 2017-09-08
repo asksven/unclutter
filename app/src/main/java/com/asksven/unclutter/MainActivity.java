@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                         {
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putBoolean("analytics", false);
-                            editor.commit();
+                            editor.apply();
                         }
                     });
 
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity
 
             SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean("analytics_opt_out_offered", true);
-            editor.commit();
+            editor.apply();
         }
 
         pm = getPackageManager();
@@ -321,7 +321,7 @@ public class MainActivity extends AppCompatActivity
             AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
             alertBuilder.setCancelable(true);
             alertBuilder.setTitle(getResources().getText(R.string.usage_stats_permission_title));
-            alertBuilder.setMessage(getResources().getText(R.string.usage_stats_permission_title));
+            alertBuilder.setMessage(getResources().getText(R.string.usage_stats_permission_details));
             alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener()
             {
                 @Override
@@ -341,7 +341,7 @@ public class MainActivity extends AppCompatActivity
                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
                 alertBuilder.setCancelable(true);
                 alertBuilder.setTitle(getResources().getText(R.string.internet_permission_title));
-                alertBuilder.setMessage(getResources().getText(R.string.internet_permission_title));
+                alertBuilder.setMessage(getResources().getText(R.string.internet_permission_details));
                 alertBuilder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener()
                 {
                     @Override

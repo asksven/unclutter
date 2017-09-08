@@ -3,9 +3,14 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     buildToolsVersion "25.0.3"
+
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
         applicationId "unclutter.asksven.com.unclutter"
-        minSdkVersion 21 // we want it to be 19
+        minSdkVersion 22 // we want it to be 19
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -79,7 +84,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
     compile 'net.hockeyapp.android:HockeySDK:4.1.3'
-    compile "com.android.support:recyclerview-v7:25.3.1"
+    compile "com.android.support:recyclerview-v7:26.+"
     compile 'com.squareup.picasso:picasso:2.5.2'
 
     testCompile 'junit:junit:4.12'
