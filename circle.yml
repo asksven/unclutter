@@ -13,7 +13,7 @@ machine:
 
 dependencies:
     pre:
-        - if [ ! -e /usr/local/android-sdk-linux/build-tools/25.0.3 ]; then echo y | android update sdk --all --no-ui --filter "build-tools-25.0.3"; fi;
+        - if [ ! -e /usr/local/android-sdk-linux/build-tools/26.0.226.0.2 ]; then echo y | android update sdk --all --no-ui --filter "build-tools-"; fi;
         - echo y | android update sdk --no-ui --all --filter tools,platform-tools
         - if [ ! -e /usr/local/android-sdk-linux/platforms/android-26 ]; then echo y | android update sdk --all --no-ui --filter "android-26"; fi;
         - echo y | android update sdk --no-ui --all --filter extra-android-m2repository
@@ -27,7 +27,7 @@ dependencies:
 
         - bash ./circleciscripts/download_keystore.sh
     cache-directories:
-        - "/usr/local/android-sdk-linux/build-tools/25.0.3"
+        - "/usr/local/android-sdk-linux/build-tools/26.0.2"
         - "/usr/local/android-sdk-linux/extras"
         - "/usr/local/android-sdk-linux/platforms/android-26"
         - "~/repoName/.gradle"
