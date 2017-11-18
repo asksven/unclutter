@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion '26.0.2'
 
     lintOptions {
         abortOnError false
@@ -62,14 +62,14 @@ android {
 
     // and a naming policy for the apks
     applicationVariants.all { variant ->
-        variant.outputs.each { output ->
+        variant.outputs.all {
             def project = "unclutter"
             def SEP = "_"
             def buildType = variant.variantData.variantConfiguration.buildType.name
             def version = variant.versionName
 
             def newApkName = project + SEP + buildType + SEP + version + ".apk"
-            output.outputFile = new File(output.outputFile.parent, newApkName)
+            outputFileName = newApkName
         }
 
     }
@@ -81,12 +81,13 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
     compile 'net.hockeyapp.android:HockeySDK:4.1.3'
-    compile "com.android.support:recyclerview-v7:26.+"
+    compile 'com.android.support:recyclerview-v7:26.+'
     compile 'com.squareup.picasso:picasso:2.5.2'
-
+    compile 'com.android.support:support-v4:26.+'
     testCompile 'junit:junit:4.12'
 }
 
@@ -100,4 +101,5 @@ def getBuildSuffix() {
     println ">>>>> Build number: \"" + ret + "\"";
     return ret
 }
+
 

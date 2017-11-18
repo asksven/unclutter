@@ -212,37 +212,6 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.action_test)
         {
-            final PackageManager pm = getPackageManager();
-            final UsageStatsManager um = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
-
-            //get a list of installed apps.
-            List<ApplicationInfo> applications = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-            List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
-            long now = System.currentTimeMillis();
-
-            Map<String, UsageStats> usageStats = um.queryAndAggregateUsageStats(now - (365 * 24 * 60 * 60 * 1000), now);
-
-            for (PackageInfo packageInfo : packages)
-            {
-                // Filter out system apps and apps not installed for the current user
-                if ( ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) && ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) == 0) )
-                {
-                    Log.d(TAG, "Installed package :" + packageInfo.packageName);
-//                    Log.d(TAG, "Installed first :" + DateUtils.formatDurationLong(now - packageInfo.firstInstallTime));
-                    Log.d(TAG, "Last updated :" + DateUtils.formatDurationLong(now - packageInfo.lastUpdateTime));
-                    UsageStats us = (UsageStats) usageStats.get(packageInfo.packageName);
-                    if (us != null)
-                    {
-                        Log.d(TAG, "Last used :" + DateUtils.formatDurationLong(now - us.getLastTimeUsed()));
-                        Log.d(TAG, "Time spend in foregroud :" + DateUtils.formatDurationLong(us.getTotalTimeInForeground()));
-                    } else
-                    {
-                        Log.d(TAG, "No usage stats found for " + packageInfo.packageName);
-                    }
-//                    Log.d(TAG, "Source dir : " + packageInfo.sourceDir);
-//                    Log.d(TAG, "Launch Activity :" + pm.getLaunchIntentForPackage(packageInfo.packageName));
-                }
-            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -255,7 +224,7 @@ public class MainActivity extends AppCompatActivity
         {
             // perform long running operation operation
 
-            for (PackageInfo packageInfo : packages)
+             for (PackageInfo packageInfo : packages)
             {
                 // Filter out system apps, apps not installed for current user and test-only apps
                 if ( ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0)
