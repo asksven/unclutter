@@ -25,6 +25,7 @@ dependencies:
         - echo y | android-sdk-linux/tools/bin/sdkmanager "extras;android;m2repository"
         - echo y | android-sdk-linux/tools/bin/sdkmanager "extras;google;m2repository"
         - echo y | android-sdk-linux/tools/bin/sdkmanager "extras;google;google_play_services"
+        - (echo y; echo y; echo y; echo y; echo y; echo y) | android-sdk-linux/tools/bin/sdkmanager --licenses
 
         #- openssl aes-256-cbc -d -in ./app/google-services.json-cipher -k $KEY >> ./app/google-services.json
         #- openssl aes-256-cbc -d -in ./app/src/gplay/google-services.json-cipher -k $KEY >> ./app/src/gplay/google-services.json
