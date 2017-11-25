@@ -17,6 +17,8 @@ machine:
 
 dependencies:
     pre:
+        - wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/tools_r${ANDROID_SDK_VERSION}-linux.zip
+        - unzip android-sdk.zip -d android-sdk-linux
         - echo y | android-sdk-linux/tools/bin/sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}"
         - echo y | android-sdk-linux/tools/bin/sdkmanager "platform-tools"
         - echo y | android-sdk-linux/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}"
