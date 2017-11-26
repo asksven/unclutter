@@ -21,8 +21,6 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
-import com.asksven.unclutter_hockeyappedition.R;
-
 import java.util.List;
 
 /**
