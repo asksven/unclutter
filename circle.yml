@@ -18,7 +18,7 @@ jobs:
           command: chmod +x ./circleciscripts/*.sh
       - run:
           name: Decrypt env vars
-          command: openssl aes-256-cbc -d -md md5 -in secret-env-cipher -out secret-env-plain -k $KEY && source secret-env-plain && echo $KEY_ALIAS
+          command: ./circleciscripts/decrypt_env_vars.sh
       - run:
           name: Download keystore
           command: ./circleciscripts/download_keystore.sh
