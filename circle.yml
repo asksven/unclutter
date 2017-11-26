@@ -14,6 +14,10 @@ jobs:
           name: chmod permissions
           command: chmod +x ./gradlew
       - run:
+          name: scripts permissions
+          command: chmod +x ./circleciscripts/*.sh
+
+      - run:
           name: Download keystore
           command: ./circleciscripts/download_keystore.sh
       - run:
