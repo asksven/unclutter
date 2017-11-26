@@ -16,13 +16,12 @@ jobs:
       - run:
           name: scripts permissions
           command: chmod +x ./circleciscripts/*.sh
-
-      - run:
-          name: Download keystore
-          command: ./circleciscripts/download_keystore.sh
       - run:
           name: Decrypt env vars
           command: openssl aes-256-cbc -d -in secret-env-cipher -out secret-env-plain -k $KEY && source secret-env-plain
+      - run:
+          name: Download keystore
+          command: ./circleciscripts/download_keystore.sh
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
