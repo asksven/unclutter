@@ -11,14 +11,14 @@ jobs:
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
+          name: Decrypt env vars and put them into .circlerc
+          command: ./circleciscripts/decrypt_env_vars.sh
+      - run:
           name: chmod permissions
           command: chmod +x ./gradlew
       - run:
           name: scripts permissions
           command: chmod +x ./circleciscripts/*.sh
-      - run:
-          name: Decrypt env vars
-          command: ./circleciscripts/decrypt_env_vars.sh
       - run:
           name: Download keystore
           command: ./circleciscripts/download_keystore.sh

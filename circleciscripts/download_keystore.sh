@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source ./secret-env-plain
-
 KEYSTORE_URI=${KEYSTORE_URI%$'\r'}
 KEYSTORE_RELEASE=${KEYSTORE_RELEASE%$'\r'}
 KEYSTORE_DEBUG=${KEYSTORE_DEBUG%$'\r'}
