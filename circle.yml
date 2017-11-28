@@ -88,7 +88,7 @@ jobs:
           name: Deploy to hockeyapp
           command: source ./circleciscripts/deployHockeyApp.sh && uploadToHockeyApp
 
-#  deploy_gplay:
+#  deploy-gplay:
 #    working_directory: ~/code
 #    docker:
 #      - image: circleci/android:api-26-alpha
@@ -105,11 +105,11 @@ workflows:
     jobs:
       - build
       - test
-          requires:
-            - build
+#        requires:
+#          - build
       - deploy
-          requires:
-            - test
+#        requires:
+#            - test
 
 #  build_test_and_deploy:
 #    jobs:
