@@ -77,7 +77,7 @@ jobs:
       - store_test_results:
           path: app/build/test-results
 
-  deploy_hockeyapp:
+  deploy:
     working_directory: ~/code
     docker:
       - image: circleci/android:api-26-alpha
@@ -107,7 +107,7 @@ workflows:
       - test
           requires:
             - build
-      - deploy_hockeyapp
+      - deploy
           requires:
             - test
 
