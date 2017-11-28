@@ -168,7 +168,7 @@ workflows:
       - deploy:
           requires:
             - test
-      - deploy_gplay:
+      - deploy-gplay:
           requires:
             - test
           filters:
