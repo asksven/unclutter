@@ -77,7 +77,7 @@ jobs:
       - store_test_results:
           path: app/build/test-results
 
-  deploy:
+  deploy_hockeyapp:
     working_directory: ~/code
     docker:
       - image: circleci/android:api-26-alpha
@@ -88,17 +88,41 @@ jobs:
           name: Deploy to hockeyapp
           command: source ./circleciscripts/deployHockeyApp.sh && uploadToHockeyApp
 
+  deploy_gplay:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-26-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - run:
+        name: Deploy to gplay
+        command: ./gradlew publishApkGplayRelease
+
 workflows:
   version: 2
-  build_and_test:
+  build_test_deploy_hockeyapp:
     jobs:
       - build
       - test
+          requires:
+            - build
+      - deploy_hockeyapp
+          requires:
+            - test
+
   build_test_and_deploy:
     jobs:
       - build
       - test
-      - deploy
+          requires:
+            - build
+      - deploy_gplay
+          requires:
+            - test
+      filters:
+        tags:
+          only: /^release-.*/
 
 ###############################################################################################
 #general:
