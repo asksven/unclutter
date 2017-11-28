@@ -38,7 +38,7 @@ jobs:
           name: Build
           command: ./gradlew build
 
-  test1:
+  test:
     working_directory: ~/code
     docker:
       - image: circleci/android:api-26-alpha
@@ -132,12 +132,12 @@ workflows:
   build-test-deploy-hockeyapp:
     jobs:
       - build
-      - test1
+      - test:
           requires:
             - build
-      - deploy
-  #        requires:
-  #          - test
+      - deploy:
+          requires:
+            - test
 
 #  build_test_and_deploy:
 #    jobs:
