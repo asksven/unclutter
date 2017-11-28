@@ -83,9 +83,35 @@ jobs:
       - image: circleci/android:api-26-alpha
     steps:
       - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
       - run:
-           name: scripts permissions
-           command: chmod +x ./circleciscripts/*.sh
+          name: chmod permissions
+          command: chmod +x ./gradlew
+      - run:
+          name: scripts permissions
+          command: chmod +x ./circleciscripts/*.sh
+
+      - run:
+          name: Decrypt env vars
+          command: ./circleciscripts/decrypt_env_vars.sh
+      - run:
+          name: Make env vars available
+          command: cat secret-env-plain >> $BASH_ENV
+
+      - run:
+          name: Download keystore
+          command: ./circleciscripts/download_keystore.sh
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      - run:
+          name: Build
+          command: ./gradlew build
       - run:
           name: Deploy to hockeyapp
           command: source ./circleciscripts/deployHockeyApp.sh && uploadToHockeyApp
