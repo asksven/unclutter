@@ -120,9 +120,9 @@ workflows:
       - deploy_gplay
           requires:
             - test
-      filters:
-        tags:
-          only: /^release-.*/
+          filters:
+            tags:
+              only: /^release-.*/
 
 ###############################################################################################
 #general:
