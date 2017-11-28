@@ -81,13 +81,8 @@ jobs:
     working_directory: ~/code
     docker:
       - image: circleci/android:api-26-alpha
-    environment:
-      JVM_OPTS: -Xmx3200m
     steps:
       - checkout
-       - run:
-           name: chmod permissions
-           command: chmod +x ./gradlew
        - run:
            name: scripts permissions
            command: chmod +x ./circleciscripts/*.sh
