@@ -133,11 +133,11 @@ workflows:
     jobs:
       - build
       - test
-        requires:
-          - build
+          requires:
+            - build
       - deploy
-        requires:
-          - test
+          requires:
+            - test
 
 #  build_test_and_deploy:
 #    jobs:
