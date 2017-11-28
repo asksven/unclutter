@@ -116,16 +116,16 @@ jobs:
           name: Deploy to hockeyapp
           command: source ./circleciscripts/deployHockeyApp.sh && uploadToHockeyApp
 
-#  deploy-gplay:
-#    working_directory: ~/code
-#    docker:
-#      - image: circleci/android:api-26-alpha
-#    environment:
-#      JVM_OPTS: -Xmx3200m
-#    steps:
-#      - run:
-#        name: Deploy to gplay
-#        command: ./gradlew publishApkGplayRelease
+  deploy-gplay:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-26-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - run:
+        name: Deploy to gplay
+        command: ./gradlew publishApkGplayRelease
 
 workflows:
   version: 2
@@ -133,11 +133,11 @@ workflows:
     jobs:
       - build
       - test
-#        requires:
-#          - build
+        requires:
+          - build
       - deploy
-#        requires:
-#            - test
+        requires:
+            - test
 
 #  build_test_and_deploy:
 #    jobs:
