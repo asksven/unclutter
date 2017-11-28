@@ -154,8 +154,8 @@ jobs:
           name: Build
           command: ./gradlew build
       - run:
-        name: Deploy to gplay
-        command: ./gradlew publishApkGplayRelease
+          name: Deploy to gplay
+          command: ./gradlew publishApkGplayRelease
 
 workflows:
   version: 2
@@ -168,10 +168,14 @@ workflows:
       - deploy:
           requires:
             - test
-      - deploy-gplay:
+      - deploy-gplay: # only for release-tags and not from branches
           requires:
             - test
           filters:
             tags:
               only: /^release.*/
+            branches:
+              ignore: /.*/
+
+
 
