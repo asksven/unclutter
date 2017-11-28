@@ -137,7 +137,7 @@ workflows:
           - build
       - deploy
         requires:
-            - test
+          - test
 
 #  build_test_and_deploy:
 #    jobs:
