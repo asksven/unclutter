@@ -83,7 +83,7 @@ jobs:
       - image: circleci/android:api-26-alpha
     steps:
       - checkout
-       - run:
+      - run:
            name: scripts permissions
            command: chmod +x ./circleciscripts/*.sh
       - run:
